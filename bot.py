@@ -13,13 +13,6 @@ botschan = None
 
 botschanid = "698583349433860106"
 welcomeid = "699456430175944785"
-try:
-    with open("welcomemsg.txt", "r") as fh:
-        welcomemessage = fh.read()
-except:
-    welcomechan = server.get_channel(welcomeid)
-    welcomemessage = "Welcome to the GRIMM public discord, {}! Please take a look at " + welcomechan.mention + " and the pinned post there to understand the Code of Conduct!"
-
 
 serverid = "696005227521900596"
 
@@ -143,5 +136,12 @@ async def mute (ctx, member:discord.User=None, reason=None):
 
 server = client.get_server(serverid)
 client.run(token)
+
+try:
+    with open("welcomemsg.txt", "r") as fh:
+        welcomemessage = fh.read()
+except:
+    welcomechan = server.get_channel(welcomeid)
+    welcomemessage = "Welcome to the GRIMM public discord, {}! Please take a look at " + welcomechan.mention + " and the pinned post there to understand the Code of Conduct!"
 
 
