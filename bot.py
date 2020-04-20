@@ -134,7 +134,10 @@ async def mute (ctx, member:discord.User=None, reason=None):
     await client.add_roles(member, muterole)
     await client.send_message(ctx.message.channel, f"{member} is muted!")
 
+
+
 # publicly available commands. Have to be used from the public bot channel unless you have GRIMM role
+
 @client.command(pass_context=True)
 @commands.check(is_botcommands_channel)
 async def role(ctx, subcmd, newrole):
