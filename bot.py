@@ -138,10 +138,12 @@ async def mute (ctx, member:discord.User=None, reason=None):
 
 # publicly available commands. Have to be used from the public bot channel unless you have GRIMM role
 
+
+
 @client.command(pass_context=True)
 @commands.check(is_botcommands_channel)
 async def role(ctx, subcmd, newrole):
-    """ Add or remove a role. Valid roles: "blue-team", "red-team", "purple-team", "threat-hunting", "threat-modeling", "binary-analysis", "training" """
+    """ Add or remove a role. Valid roles: "blue-team", "red-team", "purple-team", "threat-hunting", "threat-modeling", "binary-analysis", "training", "cyber-physical". """
     validroles = ["blue-team", "red-team", "purple-team", "threat-hunting", "threat-modeling", "binary-analysis", "training", "cyber-physical"]
     if newrole not in validroles:
         await client.send_message(ctx.message.channel, "USAGE: ~role <add|remove> <role>.\nInvalid role. Valid roles are: {}.".format(', '.join(validroles)))
