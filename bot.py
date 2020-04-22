@@ -9,6 +9,8 @@ import asyncio
 import time
 from datetime import datetime, timedelta
 
+import getjobs
+
 moderatorbotchan = None
 botschan = None
 
@@ -139,7 +141,6 @@ async def mute (ctx, member:discord.User=None, reason=None):
 # publicly available commands. Have to be used from the public bot channel unless you have GRIMM role
 
 
-
 @client.command(pass_context=True)
 @commands.check(is_botcommands_channel)
 async def role(ctx, subcmd, newrole):
@@ -163,6 +164,47 @@ async def role(ctx, subcmd, newrole):
         await client.send_message(ctx.message.channel, f"Done! Removed the {newrole} role!")
     else:
         await client.send_message(ctx.message.channel, "USAGE: ~role <add|remove> <role>.\nInvalid subcommand. Valid subcommands are: add, remove.")
+
+@client.command(pass_context=True)
+@commands.check(is_botcommands_channel)
+async def jobs(ctx, *args):
+    """ Get a list of currently open job postings. USAGE: `~jobs`: list job categories. `~jobs category <category>`: list jobs in a category. """
+    if args:
+        try:
+            if args[0] != "category":
+                await client.send_message(ctx.message.channel, "USAGE: `~jobs`: list job categories. `~jobs category <category>`: list jobs in a category.")
+                return
+            # get jobs for the given category
+            try:
+                category = ' '.join(args[1:])
+            except IndexError:
+                await client.send_message(ctx.message.channel, "USAGE:\n\t`~jobs category <category>`: list jobs in a category.")
+                return
+            if len(category) > 30:
+                await client.send_message("That category name is too long.")
+                return
+            joblist = getjobs.get_jobs_in_category(category)
+            if not joblist:
+                await client.send_message("No jobs exist, are you sure that's a valid category?");
+                categories = getjobs.get_categories()
+                if categories:
+                    await client.send_message(ctx.message.channel, "The following job categories exist:\n\t{}".format("\n\t".join(categories)))
+                return
+            output = "The following jobs exist in the {} category:\n".format(args[1])
+            for job in joblist:
+                output += "\n\t{}.\n\t\tLocation: {}.\n\t\tLink: {}".format(job[0], job[1], job[2])
+            await client.send_message(ctx.message.author, output)
+            await client.send_message(ctx.message.channel, "Reply was probably long, so it was sent in a DM")
+        except IndexError:
+            await client.send_message(ctx.message.channel, "USAGE:\n\t`~jobs category <category>`: list jobs in a category.")
+            return
+    else:
+        categories = getjobs.get_categories()
+        if categories:
+            await client.send_message(ctx.message.channel, "The following job categories exist:\n\t{}".format("\n\t".join(categories)))
+        else:
+            await client.send_message(ctx.message.channel, "Couldn't find any categories. Try viewing the listing at https://www.grimm-co.com/careers")
+    
 
 # END COMMAND HANDLERS
 
