@@ -13,15 +13,19 @@ import getjobs
 
 moderatorbotchan = None
 botschan = None
+testserverchan = None
 
+testserverchanid = "726616838053691474"
 moderatorbotschanid = "698583349433860106"
 botschanid = "701578731554078761"
 welcomeid = "699456430175944785"
 
 serverid = "696005227521900596"
+testserverid = "726616837617614861"
 
 client = commands.Bot(command_prefix="~")
 server = None
+testserver = None
 
 token = os.getenv("GRIMMBOT_TOKEN")
 
@@ -47,8 +51,10 @@ async def on_ready():
     # Set up our objects
     if botschan is None:
         server = client.get_server(serverid)
+        testserver = client.get_server(testserverid)
         botschan = server.get_channel(botschanid)
         moderatorbotchan = server.get_channel(moderatorbotschanid)
+        testserverchan = testserver.get_channel(testserverchanid)
 #    await client.change_presence(game=discord.Game(name="sounds of Hacking", type=2))
     await client.change_presence(game=discord.Game(name="backdoors and breaches"))
     print("<hacker voice>I'm in</hacker voice>")
@@ -60,7 +66,7 @@ async def on_ready():
 
 # Command filter functions
 def is_botcommands_channel(ctx):
-    if ctx.message.channel.id in [botschanid, moderatorbotschanid]:
+    if ctx.message.channel.id in [botschanid, moderatorbotschanid, testserverchanid]:
         return True
     role = discord.utils.find(lambda r: r.name.lower() == "grimm", ctx.message.server.roles)
     if role in ctx.message.author.roles:
@@ -167,44 +173,44 @@ async def role(ctx, subcmd, newrole):
 
 @client.command(pass_context=True)
 @commands.check(is_botcommands_channel)
-async def jobs(ctx, *args):
-    """ Get a list of currently open job postings. USAGE: `~jobs`: list job categories. `~jobs category <category>`: list jobs in a category. """
-    if args:
-        try:
-            if args[0] != "category":
-                await client.send_message(ctx.message.channel, "USAGE: `~jobs`: list job categories. `~jobs category <category>`: list jobs in a category.")
-                return
-            # get jobs for the given category
-            try:
-                category = ' '.join(args[1:])
-            except IndexError:
-                await client.send_message(ctx.message.channel, "USAGE:\n\t`~jobs category <category>`: list jobs in a category.")
-                return
-            if len(category) > 30:
-                await client.send_message("That category name is too long.")
-                return
-            joblist = getjobs.get_jobs_in_category(category)
-            if not joblist:
-                await client.send_message("No jobs exist, are you sure that's a valid category?");
-                categories = getjobs.get_categories()
-                if categories:
-                    await client.send_message(ctx.message.channel, "The following job categories exist:\n\t{}".format("\n\t".join(categories)))
-                return
-            output = "The following jobs exist in the {} category:\n".format(args[1])
-            for job in joblist:
-                output += "\n\t{}.\n\t\tLocation: {}.\n\t\tLink: {}".format(job[0], job[1], job[2])
-            await client.send_message(ctx.message.author, output)
-            await client.send_message(ctx.message.channel, "Reply was probably long, so it was sent in a DM")
-        except IndexError:
-            await client.send_message(ctx.message.channel, "USAGE:\n\t`~jobs category <category>`: list jobs in a category.")
-            return
-    else:
-        categories = getjobs.get_categories()
-        if categories:
-            await client.send_message(ctx.message.channel, "The following job categories exist:\n\t{}".format("\n\t".join(categories)))
+async def jobcategories(ctx):
+    """ Get a list of all open jobs. """
+    await client.send_message(ctx.message.channel, "The following categories exist:\n{}".format("\n".join(getjobs.get_categories())))
+
+@client.command(pass_context=True)
+@commands.check(is_botcommands_channel)
+async def jobsincategory(ctx, category):
+    """ Get a list of jobs in a specific category. """
+    joblist = getjobs.get_jobs_in_category(category)
+    if len(joblist) == 0:
+        await client.send_message(ctx.message.channel, "No jobs found in the specified category.")
+        return
+    for job in joblist:
+        output = getjobs.formatjob(job)
+        if len(output) > 2000:
+            for i in range(1, len(output), 2000):
+                await client.send_message(ctx.message.author, output[i:i+2000])
         else:
-            await client.send_message(ctx.message.channel, "Couldn't find any categories. Try viewing the listing at https://www.grimm-co.com/careers")
-    
+            await client.send_message(ctx.message.author, getjobs.formatjob(job))
+    await client.send_message(ctx.message.channel, "The reply is probably long. Check your DMs")
+
+
+@client.command(pass_context=True)
+@commands.check(is_botcommands_channel)
+async def jobsall(ctx):
+    """ Get a list of all open jobs. """
+    joblist = getjobs.get_all_jobs()
+    if len(joblist) == 0:
+        await client.send_message(ctx.message.channel, "No jobs found. Since we're probably hiring, this is probably a bug")
+        return
+    for job in joblist:
+        output = getjobs.formatjob(job)
+        if len(output) > 2000:
+            for i in range(1, len(output), 2000):
+                await client.send_message(ctx.message.author, output[i:i+2000])
+        else:
+            await client.send_message(ctx.message.author, getjobs.formatjob(job))
+    await client.send_message(ctx.message.channel, "The reply is probably long. Check your DMs")
 
 # END COMMAND HANDLERS
 
