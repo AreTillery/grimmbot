@@ -156,6 +156,9 @@ async def mute (ctx, member:discord.User=None, reason=None):
 async def role(ctx, subcmd, newrole):
     """ Add or remove a role. Valid roles: "blue-team", "red-team", "purple-team", "threat-hunting", "threat-modeling", "binary-analysis", "training", "CyPhy". """
     validroles = ["blue-team", "red-team", "purple-team", "threat-hunting", "threat-modeling", "binary-analysis", "training", "CyPhy"]
+    replacements = {"blueteam": "blue-team", "redteam": "red-team", "purpleteam": "purple-team", "threathunting": "threat-hunting", "threatmodeling": "threat-modeling", "binaryanalysis": "binary-analysis", "cyphy": "CyPhy"}
+    if newrole in replacements:
+        newrole = replacements[newrole]
     if newrole not in validroles:
         await ctx.send("USAGE: !role <add|remove> <role>.\nInvalid role. Valid roles are: {}.".format(', '.join(validroles)))
         return
