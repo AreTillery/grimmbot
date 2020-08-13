@@ -143,7 +143,7 @@ async def mute (ctx, member:discord.User=None, reason=None):
     if reason == None:
         reason = "For being disruptive"
     muterole = [role for role in server.roles if role.name == "muted"][0]
-    await client.add_roles(member, muterole)
+    await member.add_roles(member, muterole)
     await ctx.send(f"{member} is muted!")
 
 
@@ -164,13 +164,13 @@ async def role(ctx, subcmd, newrole):
         if roleobj in ctx.message.author.roles:
             await ctx.send(f"You already have the {newrole} role!")
             return
-        await client.add_roles(ctx.message.author, roleobj)
+        await ctx.message.author.add_roles(roleobj)
         await ctx.send(f"Done! You now have the {newrole} role!")
     elif subcmd == "remove" or subcmd == "rem":
         if roleobj not in ctx.message.author.roles:
             await ctx.send(f"You don't have the {newrole} role!")
             return
-        await client.remove_roles(ctx.message.author, roleobj)
+        await ctx.message.author.remove_roles(roleobj)
         await ctx.send(f"Done! Removed the {newrole} role!")
     else:
         await ctx.send("USAGE: !role <add|remove> <role>.\nInvalid subcommand. Valid subcommands are: add, remove.")
